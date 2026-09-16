@@ -212,3 +212,4 @@ This error occurs when the PowerPoint (`.pptx`) or Excel (`.xlsx`) file is encry
 
 2. **If the error persists:**
    - Recreate the file without security restrictions or encryption
+# costoptimize

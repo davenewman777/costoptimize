@@ -76,7 +76,7 @@ function Check-ScriptVersion {
                         Write-Log -Message "User chose to stop and download the latest version ($latestVersionString)." -Level "INFO"
                         Write-Host "`nTo download the latest version, please run the following command:" -ForegroundColor Green
                         # --- IMPORTANT: Update the URL and OutFile below to the correct ones for THIS script ---
-                        Write-Host "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/microsoft/finops-toolkit/features/wacoascripts/src/wacoa/tools/CollectCostRecommendations.ps1' -OutFile 'CollectCostRecommendations.ps1'" -ForegroundColor Cyan
+                        Write-Host "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/davenewman777/costoptimize/refs/heads/features/wacoascripts/src/wacoa/tools/CostRecommendations.ps1' -OutFile 'CostRecommendations.ps1'" -ForegroundColor Cyan
                         # --- Update the URL and OutFile above ---
                         Write-Host "`nScript execution stopped. Please download the latest version and run it again." -ForegroundColor Yellow
                         exit
@@ -132,23 +132,32 @@ function Install-AndImportModules {
 }
 
 function Connect-ToAzure {
+    param (
+        [Parameter(Mandatory = $false)]
+        [ValidateNotNullOrEmpty()]
+        [string]$EnvironmentName = 'AzureUSGovernment'
+    )
+
     if (($env:ACC_ENV -eq 'AzureCloudShell') -or ($env:CLOUD_SHELL -eq 'true')) {
         Write-Log -Message "Already connected to Azure in Cloud Shell." -Level "INFO"
         $context = Get-AzContext
+        if (-not $context -or $context.Environment.Name -ne $EnvironmentName) {
+            throw "Cloud Shell is connected to '$($context.Environment.Name)', but '$EnvironmentName' is required. Start this script from Azure Government Cloud Shell."
+        }
         Write-Log -Message "Current context: Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))" -Level "INFO"
         return
     }
 
     try {
         $context = Get-AzContext -ErrorAction Stop
-        if (-not $context) {
-            Write-Log -Message "Logging into Azure..." -Level "INFO"
-            Connect-AzAccount -ErrorAction Stop
-             $context = Get-AzContext -ErrorAction Stop
-             Write-Log -Message "Logged into Azure successfully. Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))" -Level "INFO"
+        if (-not $context -or $context.Environment.Name -ne $EnvironmentName) {
+            Write-Log -Message "Logging into Azure environment '$EnvironmentName'..." -Level "INFO"
+            Connect-AzAccount -Environment $EnvironmentName -ErrorAction Stop
+            $context = Get-AzContext -ErrorAction Stop
+            Write-Log -Message "Logged into Azure successfully. Environment: $($context.Environment.Name). Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))" -Level "INFO"
         }
         else {
-            Write-Log -Message "Already logged into Azure. Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))" -Level "INFO"
+            Write-Log -Message "Already logged into Azure environment '$EnvironmentName'. Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))" -Level "INFO"
         }
     }
     catch {
@@ -230,13 +239,13 @@ function Get-Scope {
     if ($cachedScope) {
         Write-Host "A cached scope was found from the last run:" -ForegroundColor Cyan
         Write-Host "Scope Type: $($cachedScope.ScopeType)" -ForegroundColor Cyan
-        
+
         if ($cachedScope.ScopeType -eq "EntireEnvironment") {
             Write-Host "Scope: Entire Environment (no filters)" -ForegroundColor Cyan
         }
         elseif ($cachedScope.ScopeType -eq "CustomList") {
             Write-Host "Scope: From JSON file - $($cachedScope.ScopeValue)" -ForegroundColor Cyan
-            
+
             if ($cachedScope.IndividualScopes -and $cachedScope.IndividualScopes.Count -gt 0) {
                 Write-Host "Includes:" -ForegroundColor Cyan
                 foreach ($scope in $cachedScope.IndividualScopes) {
@@ -320,64 +329,64 @@ function Get-Scope {
             }
 
             Write-Log -Message "Selected JSON file: $jsonPath" -Level "INFO"
-            
+
             try {
                 $scopeData = Get-Content -Raw -Path $jsonPath | ConvertFrom-Json -ErrorAction Stop
-                
+
                 if (-not $scopeData.scopes -or $scopeData.scopes.Count -eq 0) {
                     Write-Log -Message "Invalid JSON format or empty scopes array. JSON should contain a 'scopes' array with scope objects." -Level "ERROR"
                     throw "Invalid JSON format. The file should contain a 'scopes' array."
                 }
-                
+
                 $individualScopes = @()
                 $allSubscriptionIds = @()
-                
+
                 foreach ($item in $scopeData.scopes) {
                     $rawScope = $item.scope
-                    
+
                     if (-not $rawScope) {
                         Write-Log -Message "Invalid scope item found in JSON. Each item should have a 'scope' property." -Level "WARNING"
                         continue
                     }
-                    
+
                     if ($rawScope -match "^/subscriptions/([^/]+)$") {
                         $subId = $Matches[1]
                         $allSubscriptionIds += $subId
-                        
+
                         $individualScopes += @{
                             Type = "Subscription"
                             SubscriptionId = $subId
                             ResourceGroupName = $null
                         }
-                        
+
                         Write-Log -Message "Added subscription scope: $subId" -Level "INFO"
-                    } 
+                    }
                     elseif ($rawScope -match "^/subscriptions/([^/]+)/resourceGroups/([^/]+)$") {
                         $subId = $Matches[1]
                         $rgName = $Matches[2]
                         $allSubscriptionIds += $subId
-                        
+
                         $individualScopes += @{
                             Type = "ResourceGroup"
                             SubscriptionId = $subId
                             ResourceGroupName = $rgName
                         }
-                        
+
                         Write-Log -Message "Added resource group scope: $rgName in subscription $subId" -Level "INFO"
-                    } 
+                    }
                     else {
                         Write-Log -Message "Invalid scope format detected: $rawScope" -Level "WARNING"
                         Write-Log -Message "Expected format: /subscriptions/{subId} or /subscriptions/{subId}/resourceGroups/{rgName}" -Level "WARNING"
                     }
                 }
-                
+
                 if ($individualScopes.Count -eq 0) {
                     Write-Log -Message "No valid scopes found in the JSON file." -Level "ERROR"
                     throw "No valid scopes found in the JSON file."
                 }
-                
+
                 $allSubscriptionIds = $allSubscriptionIds | Select-Object -Unique
-                
+
                 $scope = @{
                     ScopeType         = "CustomList"
                     ScopeValue        = $jsonPath
@@ -385,7 +394,7 @@ function Get-Scope {
                     ResourceGroupName = $null
                     IndividualScopes  = $individualScopes
                 }
-                
+
                 Write-Log -Message "Loaded $($individualScopes.Count) scope(s) from JSON file." -Level "INFO"
                 Write-Log -Message "Unique subscriptions: $($allSubscriptionIds.Count)" -Level "INFO"
             }
@@ -455,3 +464,4 @@ else {
     }
 }
 }
+

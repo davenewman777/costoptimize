@@ -18,46 +18,46 @@ function Update-Scripts {
     param (
         [Parameter(Mandatory = $true)]
         [string]$MainScriptUrl,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$PrerequisitesScriptUrl,
-        
+
         [Parameter(Mandatory = $false)]
         [switch]$Force
     )
-    
+
     try {
-        $mainScriptPath = $PSCommandPath 
-        if (-not $mainScriptPath) { 
+        $mainScriptPath = $PSCommandPath
+        if (-not $mainScriptPath) {
             Write-Host "FATAL: Could not determine the script's own path using \$PSCommandPath. Update cannot proceed." -ForegroundColor Red
             return $false
         }
         $mainScriptDir = Split-Path -Parent $mainScriptPath
         $prerequisitesScriptPath = Join-Path $mainScriptDir "CostRecommendations-Prerequisites.ps1"
-        
+
         Write-Host "Downloading latest script versions..." -ForegroundColor Cyan
-        
+
         $tempMainScriptPath = Join-Path $env:TEMP "CostRecommendations.ps1.new"
         Invoke-WebRequest -Uri $MainScriptUrl -OutFile $tempMainScriptPath -ErrorAction Stop
-        
+
         $tempPrerequisitesScriptPath = Join-Path $env:TEMP "CostRecommendations-Prerequisites.ps1.new"
         Invoke-WebRequest -Uri $PrerequisitesScriptUrl -OutFile $tempPrerequisitesScriptPath -ErrorAction Stop
-        
+
         Copy-Item -Path $tempMainScriptPath -Destination $mainScriptPath -Force
         Copy-Item -Path $tempPrerequisitesScriptPath -Destination $prerequisitesScriptPath -Force
-        
+
         Remove-Item -Path $tempMainScriptPath -Force -ErrorAction SilentlyContinue
         Remove-Item -Path $tempPrerequisitesScriptPath -Force -ErrorAction SilentlyContinue
-        
+
         Write-Host "Scripts updated successfully!" -ForegroundColor Green
-        
+
         $restart = Read-Host "Do you want to restart the script with the new version? (Yes/No or Y/N)"
         if ($restart -eq "yes" -or $restart -eq "y") {
             Write-Host "Restarting script..." -ForegroundColor Cyan
             & $mainScriptPath
             return $true
         }
-        
+
         return $true
     }
     catch {
@@ -68,15 +68,16 @@ function Update-Scripts {
 
 function Load-Settings {
     $settingsPath = Join-Path $PSScriptRoot "settings.json"
-    
+
     if (-not (Test-Path -Path $settingsPath)) {
         $defaultSettings = @{
             scriptVersion = "2.0"
+            azureEnvironment = "AzureUSGovernment"
             repositoryUrls = @{
-                mainScript = "https://raw.githubusercontent.com/microsoft/finops-toolkit/refs/heads/features/wacoascripts/src/wacoa/tools/CostRecommendations.ps1"
-                prerequisitesScript = "https://raw.githubusercontent.com/microsoft/finops-toolkit/refs/heads/features/wacoascripts/src/wacoa/tools/CostRecommendations-Prerequisites.ps1"
-                versionFile = "https://raw.githubusercontent.com/microsoft/finops-toolkit/refs/heads/features/wacoascripts/src/wacoa/tools/version.txt"
-                resourcesZip = "https://github.com/microsoft/finops-toolkit/raw/refs/heads/features/wacoascripts/src/wacoa/content/azure-resources.zip"
+                mainScript = "https://raw.githubusercontent.com/davenewman777/costoptimize/refs/heads/features/wacoascripts/src/wacoa/tools/CostRecommendations.ps1"
+                prerequisitesScript = "https://raw.githubusercontent.com/davenewman777/costoptimize/refs/heads/features/wacoascripts/src/wacoa/tools/CostRecommendations-Prerequisites.ps1"
+                versionFile = "https://raw.githubusercontent.com/davenewman777/costoptimize/refs/heads/features/wacoascripts/src/wacoa/tools/version.txt"
+                resourcesZip = "https://github.com/davenewman777/costoptimize/raw/refs/heads/features/wacoascripts/src/wacoa/content/azure-resources.zip"
             }
             paths = @{
                 tempDir = "Temp"
@@ -89,11 +90,11 @@ function Load-Settings {
                 logLevel = "INFO"
             }
         }
-        
+
         $defaultSettings | ConvertTo-Json -Depth 10 | Set-Content -Path $settingsPath
         return $defaultSettings
     }
-    
+
     try {
         $settings = Get-Content -Path $settingsPath -Raw | ConvertFrom-Json
         return $settings
@@ -120,7 +121,7 @@ function Process-KQLFiles {
 
     # Separate the general KQL files from the specific reservation ones
     $kqlFiles = $allKqlFiles | Where-Object { $reservationKqlFiles -notcontains $_.Name }
-    
+
     # Check if either of the reservation recommendation files exists before prompting the user
     $oneYearFile = $allKqlFiles | Where-Object { $_.Name -eq $oneYearKqlFileName }
     $threeYearFile = $allKqlFiles | Where-Object { $_.Name -eq $threeYearKqlFileName }
@@ -161,7 +162,7 @@ function Process-KQLFiles {
     }
     elseif ($ScopeObject.ScopeType -eq "CustomList" -and $ScopeObject.IndividualScopes -and $ScopeObject.IndividualScopes.Count -gt 0) {
         $scopeConditions = @()
-        
+
         foreach ($scope in $ScopeObject.IndividualScopes) {
             if ($scope.Type -eq "Subscription") {
                 $scopeConditions += "(SubAccountId == '$($scope.SubscriptionId)')"
@@ -170,7 +171,7 @@ function Process-KQLFiles {
                 $scopeConditions += "(SubAccountId == '$($scope.SubscriptionId)' and x_ResourceGroupName == '$($scope.ResourceGroupName)')"
             }
         }
-        
+
         if ($scopeConditions.Count -gt 0) {
             $kqlFilterStringForParallel = "(" + ($scopeConditions -join " or ") + ")"
             Write-Log -Message "KQL Processing: Applying filter: $kqlFilterStringForParallel" -Level "DEBUG"
@@ -198,11 +199,11 @@ function Process-KQLFiles {
 
         try {
             $query = Get-Content -LiteralPath $file.FullName -Raw -ErrorAction Stop
-            
+
             if ($filterToApply) {
                 $query = "$query | where $filterToApply"
             }
-            
+
             Write-ParallelLog -Message "Final KQL query for $($file.Name):`n$query" -Level "DEBUG" -PathToLogFile $logFilePath
 
             try {
@@ -259,7 +260,7 @@ function Process-KQLFiles {
 
 function Process-CustomCostRecommendations {
     param (
-        [string]$BasePath 
+        [string]$BasePath
     )
 
     $customCostPath = Join-Path $BasePath "CustomCost"
@@ -314,9 +315,9 @@ function Process-CustomCostRecommendations {
 
 function Manual-Validations {
     param (
-        [string]$BasePath, 
-        [string]$ExcelFilePath, 
-        [object]$ScopeObject 
+        [string]$BasePath,
+        [string]$ExcelFilePath,
+        [object]$ScopeObject
     )
 
     try {
@@ -370,10 +371,10 @@ function Manual-Validations {
         $resourceTypeFilter = $resourceTypeConditions -join ' or '
 
         $query = "resources | where $resourceTypeFilter"
-        
+
         if ($ScopeObject.ScopeType -eq "CustomList" -and $ScopeObject.IndividualScopes -and $ScopeObject.IndividualScopes.Count -gt 0) {
             $scopeConditions = @()
-            
+
             foreach ($scope in $ScopeObject.IndividualScopes) {
                 if ($scope.Type -eq "Subscription") {
                     $scopeConditions += "(subscriptionId == '$($scope.SubscriptionId)')"
@@ -382,7 +383,7 @@ function Manual-Validations {
                     $scopeConditions += "(subscriptionId == '$($scope.SubscriptionId)' and resourceGroup == '$($scope.ResourceGroupName)')"
                 }
             }
-            
+
             if ($scopeConditions.Count -gt 0) {
                 $query += " | where " + ($scopeConditions -join " or ")
             }
@@ -397,12 +398,12 @@ function Manual-Validations {
             $subscriptionFilter = $subscriptionList -join ","
             $query += " | where subscriptionId in ($subscriptionFilter)"
         }
-        
+
         $query += " | summarize count() by type"
 
         Write-Log -Message "Querying Azure Resource Graph for specific resource types." -Level "INFO"
         Write-Log -Message "Query: $query" -Level "DEBUG"
-        
+
         $resourceTypesInScope = Search-AzGraph -Query $query -First 1000
 
         Write-Host "Resource types found in scope: $($resourceTypesInScope.type -join ', ')" -ForegroundColor Cyan
@@ -515,7 +516,7 @@ function Export-ResultsToExcel {
             x_RecommendationDate        = $_.x_RecommendationDate
         }
     }
-    
+
     $mappedData | Export-Excel -Path $ExcelFilePath -WorksheetName 'Recommendations' -AutoSize -TableName 'Table1' -TableStyle $script:settings.defaultSettings.excelTableStyle
     Write-Log -Message "Results exported to Excel file: $ExcelFilePath" -Level "INFO"
 
@@ -540,15 +541,15 @@ function Start-CostRecommendations {
 
     try {
         $script:settings = Load-Settings
-        
+
         $script:logFile = Join-Path $PSScriptRoot ('ACORL-Log-' + (Get-Date -Format 'yyyy-MM-dd-HH-mm') + '.log')
-        
+
         $prerequisitesScriptPath = Join-Path $PSScriptRoot "CostRecommendations-Prerequisites.ps1"
         if (-not (Test-Path -Path $prerequisitesScriptPath)) {
-            Write-Host "Prerequisites script not found. Attempting to download..." -ForegroundColor Yellow 
+            Write-Host "Prerequisites script not found. Attempting to download..." -ForegroundColor Yellow
             if (-not (Update-Scripts -MainScriptUrl $script:settings.repositoryUrls.mainScript -PrerequisitesScriptUrl $script:settings.repositoryUrls.prerequisitesScript -Force)) {
                 Write-Host "ERROR: Failed to download or update prerequisite scripts. The script cannot continue." -ForegroundColor Red
-                return 
+                return
             }
 
             if (-not (Test-Path -Path $prerequisitesScriptPath)) {
@@ -568,19 +569,19 @@ function Start-CostRecommendations {
             Write-Host "FATAL ERROR: Failed to load the prerequisites script '$prerequisitesScriptPath'." -ForegroundColor Red
             Write-Host "Error details: $($_.Exception.Message)" -ForegroundColor Red
             Write-Host "The script cannot continue without its prerequisites." -ForegroundColor Red
-            throw "Prerequisites loading failed." 
+            throw "Prerequisites loading failed."
         }
 
         Write-Log -Message "Starting script execution (Version $($script:settings.scriptVersion))." -Level "INFO"
-        
+
         Check-ScriptVersion -CurrentVersion $script:settings.scriptVersion -RemoteVersionUrl $script:settings.repositoryUrls.versionFile
-        
+
         if ($PSVersionTable.PSVersion.Major -lt 7) {
             Write-Host "This script requires PowerShell 7 or later. Please upgrade to PowerShell 7." -ForegroundColor Red
             Write-Host "Download PowerShell 7 from: https://aka.ms/powershell-release" -ForegroundColor Yellow
             exit
         }
-        
+
         if (($env:ACC_ENV -eq 'AzureCloudShell') -or ($env:CLOUD_SHELL -eq 'true')) {
             Write-Host "Script running from Azure CloudShell. Testing if Temp folder exist" -ForegroundColor Yellow
 
@@ -598,17 +599,17 @@ function Start-CostRecommendations {
             # Set the TEMP environment variable to the new temp folder path
             $env:TEMP = $tempFolderPath
         }
-        
+
         Install-AndImportModules -Modules @('Az.Accounts', 'Az.ResourceGraph', 'ImportExcel', 'powershell-yaml')
-        Connect-ToAzure
-        
+        Connect-ToAzure -EnvironmentName $script:settings.azureEnvironment
+
         $workingFolderPath = $PSScriptRoot
         Set-Location -Path $workingFolderPath
         Write-Log -Message "Set working directory to: $workingFolderPath" -Level "INFO"
-        
+
         $tempBaseDir = Join-Path $workingFolderPath $script:settings.paths.tempDir
         $tempDir = Join-Path $workingFolderPath $script:settings.paths.resourcesDir
-        
+
         if (-not (Test-Path -Path $tempDir -PathType Container)) {
             Write-Log -Message "Downloading and extracting zip file to $tempDir." -Level "INFO"
             if (-not (Test-Path -Path $tempBaseDir -PathType Container)) {
@@ -619,7 +620,7 @@ function Start-CostRecommendations {
         else {
             Write-Log -Message "Folder '$tempDir' already exists. Skipping download." -Level "INFO"
         }
-        
+
         $includeAssessment = Read-Host "Would you like to include the results of a Well-Architected Cost Optimization assessment? (Yes/No or Y/N)"
         $assessmentFilePath = $null
         if ($includeAssessment -eq "yes" -or $includeAssessment -eq "y") {
@@ -628,11 +629,11 @@ function Start-CostRecommendations {
                 Write-Log -Message "No file selected. Skipping Well-Architected Cost Optimization assessment." -Level "WARNING"
             }
         }
-        
+
         $scope = Get-Scope
-        
+
         $ExcelFilePath = Join-Path $PSScriptRoot ('ACORL-File-' + (Get-Date -Format 'yyyy-MM-dd-HH-mm') + '.xlsx')
-        
+
         $runManualChecks = Read-Host "Would you like to run manual checks? (Yes/No or Y/N)"
         if ($runManualChecks -eq "yes" -or $runManualChecks -eq "y") {
             Write-Log -Message "Running manual checks." -Level "INFO"
@@ -641,9 +642,9 @@ function Start-CostRecommendations {
         else {
             Write-Log -Message "Skipping manual checks as per user request." -Level "INFO"
         }
-        
+
         $results = Process-KQLFiles -BasePath $tempDir -ScopeObject $scope
-        
+
         $summary = $results.AllResources | Group-Object -Property @{
             Expression = {
                 "$($_.x_RecommendationPriority) | $($_.x_ResourceType)"
@@ -652,17 +653,17 @@ function Start-CostRecommendations {
             $groupParts = $_.Name -split ' \| '
             $priorityValue = if ($groupParts.Count -ge 1) { $groupParts[0] } else { 'Unknown Priority' }
             $resourceTypeValue = if ($groupParts.Count -ge 2) { $groupParts[1] } else { 'Unknown Type' }
-            
+
             [PSCustomObject]@{
                 Priority     = $priorityValue
                 ResourceType = $resourceTypeValue
                 ImpactedResources = $_.Count
             }
         } | Sort-Object Priority, ResourceType
-        
+
         Write-Host "`nRecommendations Summary:" -ForegroundColor Cyan
         $summary | Format-Table -AutoSize
-        
+
         if ($results.QueryErrors.Count -gt 0) {
             Write-Host "`nThe following query errors occurred:" -ForegroundColor Red
             foreach ($error in $results.QueryErrors) {
@@ -670,7 +671,7 @@ function Start-CostRecommendations {
                 Write-Host "  Error: $($error.Error)" -ForegroundColor Red
             }
         }
-        
+
         if ($results.AllResources.Count -gt 0) {
             Export-ResultsToExcel -AllResources $results.AllResources -AssessmentFilePath $assessmentFilePath -ExcelFilePath $ExcelFilePath
         }
@@ -681,7 +682,7 @@ function Start-CostRecommendations {
                 Export-ResultsToExcel -AllResources @() -AssessmentFilePath $assessmentFilePath -ExcelFilePath $ExcelFilePath
             }
         }
-        
+
         Write-Log -Message "Script execution completed." -Level "INFO"
         Write-Host "`nScript execution finished." -ForegroundColor Green
         Write-Host "Results file: $ExcelFilePath" -ForegroundColor Green
