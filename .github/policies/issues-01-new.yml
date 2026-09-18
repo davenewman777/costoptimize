@@ -1,0 +1,85 @@
+id: issues-01-new
+name: GitOps.PullRequestIssueManagement
+description: Handles when an issue is first opened
+owner:
+resource: repository
+disabled: false
+where:
+
+# spell-checker:disable
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When an author creates new issue:
+          - Assign to PM
+          - Label with `Needs: Triage 🔍`
+
+          TODO: Consider adding a comment to teach reviewer about what they can do: "@author, thanks for the issue! Please make sure all relevant details are included. @reviewer, please triage this issue. If you need more details, leave a comment with #needs-info..."
+        if:
+          - payloadType: Issues
+          - isAction:
+              action: Opened
+          - not: isAssignedToSomeone
+          - not:
+              hasLabel:
+                label: 'Needs: Information'
+          - not:
+              hasLabel:
+                label: 'Status: ✍️ Spec in progress'
+          - not:
+              hasLabel:
+                label: 'Status: 🔭 Spec review'
+          - not:
+              hasLabel:
+                label: 'Status: ▶️ Ready'
+          - not:
+              hasLabel:
+                label: 'Status: 🔄️ In progress'
+          - not:
+              hasLabel:
+                label: 'Status: 🔬 Code review'
+          - not:
+              hasLabel:
+                label: 'Good first issue 🏆'
+          - not:
+              hasLabel:
+                label: 'Skill: DevOps'
+          - not:
+              hasLabel:
+                label: 'Skill: Documentation'
+          - not:
+              hasLabel:
+                label: 'Tool: Bicep Registry'
+          - not:
+              hasLabel:
+                label: 'Tool: FinOps guide'
+          - not:
+              hasLabel:
+                label: 'Tool: FinOps hubs'
+          - not:
+              hasLabel:
+                label: 'Tool: Governance workbook'
+          - not:
+              hasLabel:
+                label: 'Tool: Open data'
+          - not:
+              hasLabel:
+                label: 'Tool: Optimization Engine'
+          - not:
+              hasLabel:
+                label: 'Tool: Optimization workbook'
+          - not:
+              hasLabel:
+                label: 'Tool: Power BI'
+          - not:
+              hasLabel:
+                label: 'Tool: PowerShell'
+          - not:
+              hasLabel:
+                label: 'Tool: Workbooks'
+        then:
+          - addLabel:
+              label: 'Needs: Triage 🔍'
+onFailure:
+onSuccess:

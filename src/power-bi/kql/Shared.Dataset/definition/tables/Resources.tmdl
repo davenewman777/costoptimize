@@ -1,0 +1,354 @@
+table Resources
+	lineageTag: ec447c64-6e55-41d8-a5ea-a43adab5dc79
+
+	column x_ResourceGroupId = "/subscriptions/" & Resources[subscriptionId] & "/resourcegroups/" & Resources[resourceGroup]
+		lineageTag: dfd516fd-8d25-441f-93a3-190abe05d572
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column id
+		dataType: string
+		lineageTag: 3e3f2af4-0c29-4314-bb73-2f2814bce3d0
+		summarizeBy: none
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column name
+		dataType: string
+		lineageTag: df96413f-3717-4f22-8e50-69d5e667c403
+		summarizeBy: none
+		sourceColumn: name
+
+		annotation SummarizationSetBy = Automatic
+
+	column type
+		dataType: string
+		lineageTag: f5eb1b01-e021-4ae0-9a31-6f52efec4801
+		summarizeBy: none
+		sourceColumn: type
+
+		annotation SummarizationSetBy = Automatic
+
+	column tenantId
+		dataType: string
+		lineageTag: f3a1771a-7794-4bf1-bf81-7c046a215b44
+		summarizeBy: none
+		sourceColumn: tenantId
+
+		annotation SummarizationSetBy = Automatic
+
+	column kind
+		dataType: string
+		lineageTag: 8ebe6066-07a6-44dd-ace8-cac50dde8d42
+		summarizeBy: none
+		sourceColumn: kind
+
+		annotation SummarizationSetBy = Automatic
+
+	column location
+		dataType: string
+		lineageTag: 565179fa-8aec-468c-bee1-0442f3a3be54
+		summarizeBy: none
+		sourceColumn: location
+
+		annotation SummarizationSetBy = Automatic
+
+	column resourceGroup
+		dataType: string
+		lineageTag: d6304358-f530-408f-ba5c-b9de2d9c2be8
+		summarizeBy: none
+		sourceColumn: resourceGroup
+
+		annotation SummarizationSetBy = Automatic
+
+	column subscriptionId
+		dataType: string
+		lineageTag: 2964f864-60c6-47d5-b1b9-cbeebda9e754
+		summarizeBy: none
+		sourceColumn: subscriptionId
+
+		annotation SummarizationSetBy = Automatic
+
+	column managedBy
+		dataType: string
+		lineageTag: 3d6b3bd8-61e1-4ee9-9e48-2dde4126c5ed
+		summarizeBy: none
+		sourceColumn: managedBy
+
+		annotation SummarizationSetBy = Automatic
+
+	column apiVersion
+		dataType: string
+		lineageTag: 9f385638-4826-47d3-a778-582a1d84e06e
+		summarizeBy: none
+		sourceColumn: apiVersion
+
+		annotation SummarizationSetBy = Automatic
+
+	column sku
+		dataType: string
+		lineageTag: 3083cfd2-2a0b-4611-b20f-83b62b59e61b
+		summarizeBy: none
+		sourceColumn: sku
+
+		annotation SummarizationSetBy = Automatic
+
+	column plan
+		dataType: string
+		lineageTag: 775f4617-96b6-437e-9ee4-0d6bab5cf383
+		summarizeBy: none
+		sourceColumn: plan
+
+		annotation SummarizationSetBy = Automatic
+
+	column properties
+		dataType: string
+		lineageTag: 3528df7f-0a3e-4b5e-a014-6576dcc17841
+		summarizeBy: none
+		sourceColumn: properties
+
+		annotation SummarizationSetBy = Automatic
+
+	column tags
+		dataType: string
+		lineageTag: 3a72fc35-9187-4335-9dfe-db3a29fe52d9
+		summarizeBy: none
+		sourceColumn: tags
+
+		annotation SummarizationSetBy = Automatic
+
+	column identity
+		dataType: string
+		lineageTag: 0b2fc11d-ad31-4b95-892d-10f69345bcda
+		summarizeBy: none
+		sourceColumn: identity
+
+		annotation SummarizationSetBy = Automatic
+
+	column zones
+		dataType: string
+		lineageTag: f7fcdecc-b196-45e7-b4fa-7d9e78cca4cd
+		summarizeBy: none
+		sourceColumn: zones
+
+		annotation SummarizationSetBy = Automatic
+
+	column extendedLocation
+		dataType: string
+		lineageTag: d0a8c984-aa5f-46ed-bc4f-e800b5c08135
+		summarizeBy: none
+		sourceColumn: extendedLocation
+
+		annotation SummarizationSetBy = Automatic
+
+	column systemData
+		dataType: string
+		lineageTag: a75abd3c-1e1a-4c6c-bf27-bb4721fabf61
+		summarizeBy: none
+		sourceColumn: systemData
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'sku.name'
+		dataType: string
+		lineageTag: 35b069ad-c8bc-4391-803c-f021a5fbfb65
+		summarizeBy: none
+		sourceColumn: sku.name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'sku.tier'
+		dataType: string
+		lineageTag: 086b9d6b-f3a9-4d75-a7ea-6f006347d008
+		summarizeBy: none
+		sourceColumn: sku.tier
+
+		annotation SummarizationSetBy = Automatic
+
+	column provisioningState
+		dataType: string
+		lineageTag: fdd2dbec-e551-4142-b5d9-0d603d9c3cf5
+		summarizeBy: none
+		sourceColumn: provisioningState
+
+		annotation SummarizationSetBy = Automatic
+
+	column privateEndpointConnections
+		dataType: string
+		lineageTag: 89ca0b2d-8e5b-4034-9ae2-65448c4e4fe0
+		summarizeBy: none
+		sourceColumn: privateEndpointConnections
+
+		annotation SummarizationSetBy = Automatic
+
+	column encryption
+		dataType: string
+		lineageTag: 9c2d6029-d42b-4bc5-8295-4e208708265a
+		summarizeBy: none
+		sourceColumn: encryption
+
+		annotation SummarizationSetBy = Automatic
+
+	column creationTime
+		dataType: string
+		lineageTag: 3793d80a-795c-429a-a786-e29e1c04cb0c
+		summarizeBy: none
+		sourceColumn: creationTime
+
+		annotation SummarizationSetBy = Automatic
+
+	column supportsHttpsTrafficOnly
+		dataType: string
+		lineageTag: 063e00d5-bd8e-4760-93ff-d92d0a7c37ac
+		summarizeBy: none
+		sourceColumn: supportsHttpsTrafficOnly
+
+		annotation SummarizationSetBy = Automatic
+
+	column allowBlobPublicAccess
+		dataType: string
+		lineageTag: 3e46aa0d-e102-4b91-9c9a-2ab20dc8ddf8
+		summarizeBy: none
+		sourceColumn: allowBlobPublicAccess
+
+		annotation SummarizationSetBy = Automatic
+
+	column minimumTlsVersion
+		dataType: string
+		lineageTag: 44d0cd04-8b9e-4ad6-b3e9-ecc0bf65bfa9
+		summarizeBy: none
+		sourceColumn: minimumTlsVersion
+
+		annotation SummarizationSetBy = Automatic
+
+	column primaryEndpoints
+		dataType: string
+		lineageTag: b12a7771-9025-4915-bab0-ed938b232268
+		summarizeBy: none
+		sourceColumn: primaryEndpoints
+
+		annotation SummarizationSetBy = Automatic
+
+	column keyCreationTime
+		dataType: string
+		lineageTag: fa324614-c1fa-4583-a85f-de4b0dc7bf27
+		summarizeBy: none
+		sourceColumn: keyCreationTime
+
+		annotation SummarizationSetBy = Automatic
+
+	column primaryLocation
+		dataType: string
+		lineageTag: b2dbc044-29a4-48e7-aebc-847a1a81d90e
+		summarizeBy: none
+		sourceColumn: primaryLocation
+
+		annotation SummarizationSetBy = Automatic
+
+	column statusOfPrimary
+		dataType: string
+		lineageTag: cba54bc2-286f-4066-afa7-1c8b4fa0913d
+		summarizeBy: none
+		sourceColumn: statusOfPrimary
+
+		annotation SummarizationSetBy = Automatic
+
+	column networkAcls
+		dataType: string
+		lineageTag: d40a196a-ead5-41b5-9dc2-a637b7ec22fe
+		summarizeBy: none
+		sourceColumn: networkAcls
+
+		annotation SummarizationSetBy = Automatic
+
+	column allowCrossTenantReplication
+		dataType: string
+		lineageTag: 47485702-2b07-4a14-a4a9-1fc64ec0039f
+		summarizeBy: none
+		sourceColumn: allowCrossTenantReplication
+
+		annotation SummarizationSetBy = Automatic
+
+	column allowSharedKeyAccess
+		dataType: string
+		lineageTag: 243e9cb9-46bb-4d2e-9fd6-87ada5759ca0
+		summarizeBy: none
+		sourceColumn: allowSharedKeyAccess
+
+		annotation SummarizationSetBy = Automatic
+
+	column accessTier
+		dataType: string
+		lineageTag: 8c0df7eb-7b03-4def-a02b-77427378e142
+		summarizeBy: none
+		sourceColumn: accessTier
+
+		annotation SummarizationSetBy = Automatic
+
+	column isHnsEnabled
+		dataType: string
+		lineageTag: 390621b6-ef69-4bf4-8e99-1c669cde054d
+		summarizeBy: none
+		sourceColumn: isHnsEnabled
+
+		annotation SummarizationSetBy = Automatic
+
+	column isBlueShiftAccount
+		dataType: string
+		lineageTag: c27473d5-cf3f-42e0-afa1-b25a7b70cd4c
+		summarizeBy: none
+		sourceColumn: isBlueShiftAccount
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Resources = m
+		mode: import
+		queryGroup: 'Resource Graph'
+		source =
+				let
+				  query = "
+				    resources
+				    | extend
+				      id = tolower(id),
+				      ['sku.name'] = sku.name,
+				      ['sku.tier'] = sku.tier,
+				      ['provisioningState'] = properties.provisioningState,
+				      ['privateEndpointConnections'] = properties.privateEndpointConnections,
+				      ['encryption'] = properties.encryption,
+				      ['creationTime'] = properties.creationTime,
+				      ['supportsHttpsTrafficOnly'] = properties.supportsHttpsTrafficOnly,
+				      ['allowBlobPublicAccess'] = properties.allowBlobPublicAccess,
+				      ['minimumTlsVersion'] = properties.minimumTlsVersion,
+				      ['primaryEndpoints'] = properties.primaryEndpoints,
+				      ['keyCreationTime'] = properties.keyCreationTime,
+				      ['primaryLocation'] = properties.primaryLocation,
+				      ['statusOfPrimary'] = properties.statusOfPrimary,
+				      ['networkAcls'] = properties.networkAcls,
+				      ['allowCrossTenantReplication'] = properties.allowCrossTenantReplication,
+				      ['allowSharedKeyAccess'] = properties.allowSharedKeyAccess,
+				      ['accessTier'] = properties.accessTier,
+				      ['isHnsEnabled'] = properties.isHnsEnabled,
+				      ['isBlueShiftAccount'] = properties.isBlueShiftAccount
+				  " & ftk_DemoFilter(),
+				  Source = AzureResourceGraph.Query(query, "Tenant", null, null, [resultTruncated = false]),
+				  NullHandling =
+				    if Table.HasColumns(Source, "Results") and Table.RowCount(Source) = 1 then
+				      #table(
+				        { "id", "name", "type", "location", "subscriptionId", "sku.name", "sku.tier", "provisioningState", "privateEndpointConnections", "encryption", "creationTime", "supportsHttpsTrafficOnly", "allowBlobPublicAccess", "minimumTlsVersion", "primaryEndpoints", "keyCreationTime", "primaryLocation", "statusOfPrimary", "networkAcls", "allowCrossTenantReplication", "allowSharedKeyAccess", "accessTier", "isHnsEnabled", "isBlueShiftAccount" },
+				        {}
+				      )
+				    else Source,
+				
+				  // Remove duplicate IDs
+				  // This step may hide valid rows and show invalid rows due to a bug in Resource Graph. We do not recommend it but are including it in case you want to unblock yourself.
+				  // If you experience a "duplicate IDs" error for the Resources table, please file a support request against Azure Resource Graph.
+				  RemoveDuplicates = if #"Remove Duplicate Resource IDs" then Table.Distinct(NullHandling, {"id"}) else NullHandling
+				in
+				  RemoveDuplicates
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

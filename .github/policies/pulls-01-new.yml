@@ -1,0 +1,27 @@
+id: pulls-01-new
+name: GitOps.PullRequestIssueManagement
+description: Handles when a PR is opened (not against main)
+owner:
+resource: repository
+disabled: false
+where:
+
+# spell-checker:disable
+configuration:
+  resourceManagementConfiguration:
+    eventResponderTasks:
+      - description: >-
+          When a PR is opened (not against main):
+          - Label with `Needs: Review 👀`
+        if:
+          - payloadType: Pull_Request
+          - isAction:
+              action: Opened
+          - not:
+              targetsBranch:
+                branch: main
+        then:
+          - addLabel:
+              label: 'Needs: Review 👀'
+onFailure:
+onSuccess:

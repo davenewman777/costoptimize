@@ -1,0 +1,60 @@
+name: Open Data CI
+on:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - 'src/open-data/*.csv'
+      - 'src/open-data/*.json'
+permissions: 
+  contents: write
+  pull-requests: write
+  statuses: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env: 
+      CI_COMMIT_MESSAGE: Generate PowerShell commands for open data
+      CI_COMMIT_AUTHOR: Open Data CI
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+    - name: Set environment variable "commit-message"
+      run: echo "commit-message=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+    - name: Set environment variable "build_url"
+      run: echo "build_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+    - name: Set environment variable "commit-author"
+      run: echo "commit-author=$(git log -1 --pretty=format:'%an')" >> $GITHUB_ENV
+    - name: Set environment variable "is-auto-commit"
+      if: env.commit-message == env.CI_COMMIT_MESSAGE && env.commit-author == env.CI_COMMIT_AUTHOR
+      run: echo "is-auto-commit=true" >> $GITHUB_ENV
+    - name: Build Open Data
+      if: env.is-auto-commit == false
+      shell: pwsh
+      run: |
+        src/scripts/Build-OpenData.ps1 -PowerShell
+        if (git status --porcelain)
+        {
+          git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+          git config --global user.email "finopstoolkit@users.noreply.github.com"
+          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git push
+        }
+    - name: Test Open Data
+      id: test
+      shell: pwsh
+      run: |
+        src/scripts/Build-OpenData.ps1 -Test
+    - uses: actions/github-script@v7
+      if: failure()
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '⚠️ Open Data CI task failed: ${{ env.build_url }}'
+          })
